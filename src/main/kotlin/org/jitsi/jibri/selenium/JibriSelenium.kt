@@ -129,7 +129,11 @@ class JibriSelenium(
                 "--enabled",
                 "--disable-infobars",
                 "--alsa-output-device=plug:amix",
-                "--autoplay-policy=no-user-gesture-required"
+                "--autoplay-policy=no-user-gesture-required",
+				"--headless",
+				"--no-sandbox",
+				"--disable-gpu",
+				"--disable-dev-shm-usage"
         )
         chromeOptions.addArguments(jibriSeleniumOptions.extraChromeCommandLineFlags)
         val chromeDriverService = ChromeDriverService.Builder().withEnvironment(
@@ -212,14 +216,11 @@ class JibriSelenium(
             "email" to jibriSeleniumOptions.email,
             "callStatsUserName" to "jibri"
         )
-
-//        xmppCredentials?.let {
-//            localStorageValues["xmpp_username_override"] = "${xmppCredentials.username}@${xmppCredentials.domain}"
-//            localStorageValues["xmpp_password_override"] = xmppCredentials.password
-//        }
         xmppCredentials?.let {
-            setLocalStorageValues(localStorageValues)
+            localStorageValues["xmpp_username_override"] = "${xmppCredentials.username}@${xmppCredentials.domain}"
+            localStorageValues["xmpp_password_override"] = xmppCredentials.password
         }
+        setLocalStorageValues(localStorageValues)
         if (!CallPage(chromeDriver).visit(callUrlInfo.callUrl)) {
             return false
         }
