@@ -140,15 +140,15 @@ class FileRecordingJibriService(
 
         whenever(jibriSelenium).transitionsTo(ComponentState.Running) {
             logger.info("Selenium joined the call, starting the capturer")
-            capturer.start(sink)
-        }
-        try {
-            jibriSelenium.addToPresence("session_id", fileRecordingParams.sessionId)
-            jibriSelenium.addToPresence("mode", JibriIq.RecordingMode.FILE.toString())
-            jibriSelenium.sendPresence()
-        } catch (t: Throwable) {
-            logger.error("Error while setting fields in presence", t)
-            publishStatus(ComponentState.Error(ErrorScope.SESSION, "Unable to set presence values"))
+            try {
+                jibriSelenium.addToPresence("session_id", fileRecordingParams.sessionId)
+                jibriSelenium.addToPresence("mode", JibriIq.RecordingMode.FILE.toString())
+                jibriSelenium.sendPresence()
+                capturer.start(sink)
+            } catch (t: Throwable) {
+                logger.error("Error while setting fields in presence", t)
+                publishStatus(ComponentState.Error(ErrorScope.SESSION, "Unable to set presence values"))
+            }
         }
     }
 
@@ -176,8 +176,8 @@ class FileRecordingJibriService(
                     .use {
                         jacksonObjectMapper().writeValue(it, metadata)
                     }
-            } catch (e: Exception) {
-                logger.error("Error writing metadata", e)
+            } catch (t: Throwable) {
+                logger.error("Error writing metadata", t)
                 publishStatus(ComponentState.Error(ErrorScope.SYSTEM, "Could not write meeting metadata"))
             }
         } else {
